@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matriz y Gestión de Riesgos Corporativos</title>
+<style>
+:root{
+ --navy:#102b4e;--navy2:#174a7e;--teal:#007f86;--teal2:#d9f8f1;
+ --ink:#16263d;--muted:#53677f;--line:#d3e0ee;--bg:#edf4fb;--white:#fff;
+ --high:#e11d48;--highbg:#ffe3e9;--med:#c46a00;--medbg:#fff0c9;--low:#07804f;--lowbg:#d9fbe8;
+ --shadow:0 12px 32px rgba(19,40,63,.08)
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",Arial,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+.hero{background:linear-gradient(115deg,#102b4e 0%,#176b87 54%,#008f88 100%);color:white;padding:30px max(20px,calc((100% - 1280px)/2)) 26px}
+.kicker{font-size:11px;letter-spacing:.15em;font-weight:800;text-transform:uppercase;color:#a8eee2}
+h1{font-size:clamp(27px,4vw,40px);line-height:1.12;margin:8px 0 10px;max-width:800px}
+.hero p{margin:0;color:#e2edf5;max-width:850px;font-size:16px}
+.hero-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff4d;border-radius:30px;padding:5px 10px;font-size:12px;color:white}
+main{max-width:1280px;margin:0 auto;padding:22px 20px 48px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.stat{background:white;border:1px solid var(--line);border-radius:14px;padding:15px 17px;box-shadow:0 4px 14px #13283f08}
+.stat strong{display:block;font-size:28px;line-height:1.1;color:var(--teal)}
+.stat span{font-size:12px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(400px,.95fr);gap:18px;align-items:start}
+.panel{background:white;border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow);overflow:hidden}
+.panel-head{padding:18px 20px 12px;border-bottom:1px solid #e8edf2}
+.panel-head h2{font-size:19px;margin:0 0 4px;color:var(--navy)}
+.panel-head p{font-size:12px;color:var(--muted);margin:0}
+.matrix-wrap{padding:16px 18px 18px}
+.matrix{display:grid;grid-template-columns:82px repeat(3,minmax(0,1fr));gap:7px}
+.axis{display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;color:var(--muted);font-weight:800;padding:6px}
+.axis.side{writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.04em}
+.cell{border:1px solid transparent;border-radius:12px;min-height:112px;padding:9px;text-align:left;transition:.15s;position:relative;display:block;width:100%;}
+.cell:hover,.cell:focus-visible{outline:3px solid #13283f33;transform:translateY(-1px)}
+.cell.selected{outline:3px solid var(--navy);outline-offset:1px}
+.cell.high{background:var(--highbg);border-color:#f5c8ce}
+.cell.med{background:var(--medbg);border-color:#f4d8a5}
+.cell.low{background:var(--lowbg);border-color:#bde7d8}
+.cell .level{font-size:10px;font-weight:800;text-transform:uppercase;display:block;margin-bottom:7px}
+.cell.high .level{color:var(--high)}.cell.med .level{color:var(--med)}.cell.low .level{color:var(--low)}
+.cell .ids{display:flex;flex-wrap:wrap;gap:5px}
+.event-chip{display:inline-flex;align-items:center;justify-content:center;min-width:31px;padding:4px 6px;background:#fff;border:1px solid #aab9c8;border-radius:7px;font-size:11px;font-weight:800;color:var(--navy)}
+.event-chip.active{background:var(--navy);color:white;border-color:var(--navy)}
+.cell .empty{font-size:11px;color:#788697;display:block;padding-top:5px}.cell .ids{min-height:26px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;color:var(--muted);font-size:11px}
+.legend span{display:flex;align-items:center;gap:6px}.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.selector{padding:13px 18px;border-top:1px solid #e8edf2;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.selector label{font-size:12px;font-weight:800;color:var(--muted)}
+.selector select{flex:1;min-width:220px;border:1px solid #c8d3de;border-radius:9px;padding:9px;background:white;color:var(--ink)}
+.detail-head{background:linear-gradient(115deg,#eaf4ff,#f2fffc);padding:18px 20px;border-bottom:1px solid var(--line)}
+.detail-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.event-id{font-size:11px;font-weight:900;color:var(--teal);letter-spacing:.12em}
+.detail-head h2{font-size:22px;line-height:1.2;margin:5px 0 10px;color:var(--navy)}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{display:inline-flex;border-radius:30px;padding:4px 9px;font-size:11px;font-weight:800;background:#e8edf3;color:#31465a}
+.badge.high{background:var(--highbg);color:var(--high)}.badge.med{background:var(--medbg);color:var(--med)}.badge.low{background:var(--lowbg);color:var(--low)}
+.detail-body{padding:17px 20px 20px}
+.section-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--muted);margin:0 0 9px}
+.event-description{font-size:13px;color:#394b5e;margin:0 0 17px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 0 12px}
+.tab{border:1px solid var(--line);background:white;color:var(--navy);border-radius:10px;padding:10px 7px;font-size:12px;font-weight:800}
+.tab[aria-selected="true"]{background:var(--navy);color:white;border-color:var(--navy)}
+.treatment{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:linear-gradient(135deg,#f2f8ff,#f4fffb);min-height:90px}
+.treatment .t-label{font-size:10px;letter-spacing:.1em;font-weight:900;text-transform:uppercase;color:var(--teal)}
+.treatment h3{font-size:15px;margin:5px 0;color:var(--navy)}
+.treatment p{font-size:13px;color:#435468;margin:0}
+.actions{margin-top:18px}
+.action-list{display:grid;gap:9px}
+.action{display:grid;grid-template-columns:32px 1fr;gap:10px;padding:11px;border:1px solid var(--line);border-radius:11px;background:white}
+.action-num{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--teal2);color:var(--teal);font-weight:900}
+.action strong{display:block;font-size:13px;color:var(--navy);margin-bottom:3px}
+.action p{font-size:12px;color:#4b5c6d;margin:0}
+.action-type{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;color:var(--teal);display:block;margin-bottom:3px}
+.footnote{margin-top:17px;padding:12px 14px;background:#fff4d6;border:1px solid #f3d37c;border-radius:11px;color:#714b00;font-size:11px}
+.bottom{margin-top:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.simple-panel{background:white;border:1px solid var(--line);border-radius:15px;padding:17px 19px}
+.simple-panel h2{font-size:17px;margin:0 0 8px;color:var(--navy)}
+.simple-panel p{font-size:12px;color:var(--muted);margin:0}
+.priority-list{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.priority{border-radius:10px;padding:10px;background:linear-gradient(135deg,#f2f8ff,#f3fffb);border:1px solid var(--line)}
+.priority strong{font-size:12px;display:block;color:var(--navy)}.priority span{font-size:11px;color:var(--muted)}
+.footer{text-align:center;color:#728195;font-size:11px;padding:20px 0 0}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.bottom{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){main{padding:14px 10px 30px}.hero{padding:24px 16px}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:24px}.matrix{grid-template-columns:55px repeat(3,minmax(0,1fr));gap:5px}.cell{min-height:105px;padding:6px}.axis{font-size:9px}.event-chip{min-width:27px;font-size:10px;padding:4px}.detail-head,.detail-body{padding:15px}.detail-head h2{font-size:19px}.tabs{gap:4px}.tab{font-size:11px;padding:9px 4px}}
+@media print{body{background:white}.hero{padding:20px}.panel,.stat{box-shadow:none}.layout{grid-template-columns:1fr 1fr}button,select{display:none}.cell{min-height:85px}}
+
+/* Tema vivo: mayor contraste y acentos brillantes */
+.hero{box-shadow:inset 0 -4px 0 #41e0c3}
+.stat{border-top:4px solid #18b7ad}
+.stat:nth-child(2){border-top-color:#f59e0b}
+.stat:nth-child(3){border-top-color:#478bff}
+.stat:nth-child(4){border-top-color:#a855f7}
+.panel-head{background:linear-gradient(110deg,#f5faff,#effffb)}
+.cell{box-shadow:0 3px 8px rgba(16,43,78,.05)}
+.cell.high{background:linear-gradient(145deg,#ffe3e9,#ffd2dc);border-color:#ff9bad}
+.cell.med{background:linear-gradient(145deg,#fff0c9,#ffe5a3);border-color:#f2c35e}
+.cell.low{background:linear-gradient(145deg,#d9fbe8,#c7f7df);border-color:#86dfb5}
+.event-chip{box-shadow:0 2px 4px rgba(16,43,78,.08);border-color:#b9cce0}
+.event-chip.active{background:#102b4e;color:#fff;border-color:#102b4e;box-shadow:0 0 0 2px #49dbc4}
+.tab{transition:background .15s,border-color .15s,transform .15s}
+.tab:hover{border-color:#16a7a2;background:#e6fffa;transform:translateY(-1px)}
+.tab[aria-selected="true"]{background:linear-gradient(120deg,#102b4e,#176b87);border-color:#176b87;box-shadow:0 4px 10px #102b4e24}
+.action{background:linear-gradient(110deg,#fff,#f7fbff)}
+.action-num{background:linear-gradient(135deg,#b7fff0,#d6f0ff);color:#006b78}
+.badge.high{background:#ffe0e7;color:#c0103c}
+.badge.med{background:#fff0c2;color:#985000}
+.badge.low{background:#d7fbe6;color:#087047}
+
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="kicker">Gobierno corporativo · Gestión integral</div>
+  <h1>Matriz y Gestión de Riesgos Corporativos</h1>
+  <p>Ubicación de los eventos por probabilidad e impacto, alternativas de tratamiento y dos acciones concretas para reducir la probabilidad o el impacto de cada riesgo.</p>
+  <div class="hero-meta"><span class="pill">10 eventos evaluados</span><span class="pill">Matriz 3 × 3</span><span class="pill">3 alternativas de tratamiento</span><span class="pill">2 acciones por evento</span></div>
+</header>
+<main>
+  <section class="stats" aria-label="Resumen">
+    <div class="stat"><strong>10</strong><span>Eventos de riesgo analizados</span></div>
+    <div class="stat"><strong id="highCount">6</strong><span>Prioridad alta · clasificación propuesta</span></div>
+    <div class="stat"><strong>3</strong><span>Opciones por evento: aceptar, compartir, transferir</span></div>
+    <div class="stat"><strong>20</strong><span>Acciones de mitigación sugeridas</span></div>
+  </section>
+
+  <section class="layout">
+    <article class="panel">
+      <div class="panel-head">
+        <h2>1. Mapa de probabilidad e impacto</h2>
+        <p>Selecciona un código E1–E10 en la matriz para consultar el evento. El color indica la prioridad estimada.</p>
+      </div>
+      <div class="matrix-wrap">
+        <div class="matrix" id="matrix" aria-label="Matriz de probabilidad e impacto"></div>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--high)"></i>Prioridad alta</span>
+          <span><i class="dot" style="background:var(--med)"></i>Prioridad media</span>
+          <span><i class="dot" style="background:var(--low)"></i>Prioridad baja</span>
+        </div>
+      </div>
+      <div class="selector">
+        <label for="riskSelect">Consultar evento:</label>
+        <select id="riskSelect" aria-label="Seleccionar evento"></select>
+      </div>
+    </article>
+
+    <article class="panel" id="detailPanel" aria-live="polite">
+      <div class="detail-head">
+        <div class="detail-top">
+          <div>
+            <div class="event-id" id="detailId">EVENTO E1</div>
+            <h2 id="detailTitle">Vencimiento de certificados de pagarés</h2>
+          </div>
+        </div>
+        <div class="badges" id="badges"></div>
+      </div>
+      <div class="detail-body">
+        <div class="section-label">Situación de riesgo</div>
+        <p class="event-description" id="description"></p>
+        <div class="section-label">2. Alternativas de tratamiento</div>
+        <div class="tabs" role="tablist" aria-label="Alternativas de tratamiento">
+          <button class="tab" role="tab" data-treatment="accept" aria-selected="true">Aceptar</button>
+          <button class="tab" role="tab" data-treatment="share" aria-selected="false">Compartir</button>
+          <button class="tab" role="tab" data-treatment="transfer" aria-selected="false">Transferir</button>
+        </div>
+        <div class="treatment" id="treatmentContent" role="tabpanel"></div>
+        <div class="actions">
+          <div class="section-label">3. Gestiones de mitigación</div>
+          <div class="action-list" id="actions"></div>
+        </div>
+        <div class="footnote"><strong>Criterio de lectura:</strong> aceptar, compartir y transferir son alternativas a evaluar; no necesariamente se aplican simultáneamente. Las acciones de mitigación buscan reducir probabilidad o impacto.</div>
+      </div>
+    </article>
+  </section>
+
+  <section class="bottom">
+    <article class="simple-panel">
+      <h2>Cómo interpretar la matriz</h2>
+      <p>La probabilidad expresa qué tan factible es que ocurra el evento; el impacto representa la severidad de sus consecuencias. La combinación orienta la prioridad de atención. Selecciona cada evento para ver su razonamiento y tratamiento.</p>
+      <div class="priority-list">
+        <div class="priority"><strong>Alta</strong><span>Atención prioritaria y seguimiento frecuente.</span></div>
+        <div class="priority"><strong>Media</strong><span>Controles y revisión periódica.</span></div>
+        <div class="priority"><strong>Baja</strong><span>Monitoreo y respuesta proporcional.</span></div>
+      </div>
+    </article>
+  </section>
+  <div class="footer">Matriz de análisis · Riesgos financieros, operativos, comerciales y regulatorios</div>
+</main>
+<script>
+const risks = [
+{id:"E1",title:"Vencimiento de certificados de pagarés",short:"Vencimiento de pagarés",prob:"Alta",impact:"Alto",level:"high",desc:"En 30 días vence una emisión de certificados de pagarés corporativos por Q12 millones y no existe una línea de refinanciamiento bancario aprobada. La presión inmediata recae sobre la liquidez y la capacidad de pago.",treatments:{
+accept:{title:"Aceptar el riesgo residual",text:"Mantener el vencimiento como exposición temporal únicamente si Tesorería demuestra que el flujo disponible cubre el pago y la gerencia aprueba formalmente la contingencia."},
+share:{title:"Compartir la exposición de liquidez",text:"Negociar con los tenedores una renovación parcial o escalonada del vencimiento, distribuyendo el calendario de pago entre la empresa y los acreedores."},
+transfer:{title:"Transferir parte de la necesidad de financiamiento",text:"Estructurar financiamiento puente o sindicado con una entidad financiera, sujeto a aprobación y a condiciones viables."}},
+actions:[{type:"Reducir probabilidad",title:"Negociar una prórroga antes del vencimiento",text:"Contactar de inmediato a los tenedores y documentar una extensión o renovación parcial para evitar un incumplimiento en la fecha original."},{type:"Reducir impacto",title:"Preparar un plan de liquidez de 30 días",text:"Priorizar pagos críticos, acelerar cobros y definir fuentes contingentes de efectivo para cubrir el faltante si no se concreta el refinanciamiento."}]},
+{id:"E2",title:"Retraso de cobro del principal cliente institucional",short:"Mora del cliente institucional",prob:"Alta",impact:"Alto",level:"high",desc:"Existe un retraso acumulado de 90 días en facturas del principal cliente institucional, que representa el 25% de la cartera por cobrar. La concentración y la demora presionan el capital de trabajo.",treatments:{
+accept:{title:"Aceptar temporalmente la demora",text:"Reconocer la exposición de corto plazo solo si existe evidencia de recuperación probable, capacidad financiera suficiente y seguimiento formal de las facturas vencidas."},
+share:{title:"Compartir el efecto del retraso",text:"Acordar un calendario de pagos parciales con el cliente y negociar condiciones que distribuyan el esfuerzo de recuperación sin detener la relación comercial."},
+transfer:{title:"Transferir parte de la exposición de cobro",text:"Evaluar factoring o cesión de facturas a una entidad financiera, revisando costos, elegibilidad del deudor y si la operación realmente transfiere el riesgo de impago."}},
+actions:[{type:"Reducir probabilidad",title:"Escalar la gestión de cobro con el cliente",text:"Conciliar facturas, corregir expedientes pendientes y establecer reuniones con responsables de pago para resolver bloqueos administrativos."},{type:"Reducir impacto",title:"Diversificar la cartera y crear reserva de liquidez",text:"Reducir gradualmente la dependencia de un solo cliente y reservar liquidez para cubrir gastos mientras se recuperan los saldos vencidos."}]},
+{id:"E3",title:"Aumento de costos de fletes marítimos",short:"Incremento de fletes",prob:"Media",impact:"Medio",level:"med",desc:"Los costos de fletes marítimos internacionales aumentan 20% por conflictos en rutas comerciales y se exige liquidación inmediata en divisas antes del desembarque. Esto puede elevar el costo de importación y presionar la caja.",treatments:{
+accept:{title:"Aceptar una variación acotada",text:"Absorber el aumento cuando el monto esté dentro de un umbral aprobado y la rentabilidad del producto siga siendo aceptable."},
+share:{title:"Compartir el costo con contrapartes",text:"Negociar tarifas indexadas, acuerdos de ajuste de precio o distribución del incremento con proveedores y clientes."},
+transfer:{title:"Transferir parte de la volatilidad",text:"Usar contratos de flete con tarifa acordada, coberturas cambiarias apropiadas o seguro de carga cuando correspondan; cada instrumento cubre riesgos específicos."}},
+actions:[{type:"Reducir probabilidad",title:"Contratar capacidad y tarifas con anticipación",text:"Negociar contratos de volumen o alternativas de ruta con más de un operador logístico para reducir la exposición a aumentos repentinos."},{type:"Reducir impacto",title:"Preparar presupuesto de divisas y rutas alternas",text:"Estimar el efectivo requerido antes del desembarque, revisar proveedores alternativos y actualizar el costo total importado para decidir ajustes comerciales."}]},
+{id:"E4",title:"Interrupción de facturación e inventarios por ciberataque",short:"Ciberataque y cobros interrumpidos",prob:"Media",impact:"Alto",level:"high",desc:"Un ciberataque interrumpe durante tres días el sistema de facturación e inventarios e impide los cobros diarios de la red de distribuidoras. Se afectan la continuidad operativa, la liquidez y potencialmente los datos.",treatments:{
+accept:{title:"Aceptar el riesgo residual",text:"Aceptar únicamente la exposición remanente después de aplicar controles mínimos, con aprobación de la gerencia y tolerancia de interrupción definida."},
+share:{title:"Compartir responsabilidades de ciberseguridad",text:"Contratar servicios administrados o infraestructura en la nube con responsabilidades, niveles de servicio y tiempos de recuperación definidos contractualmente."},
+transfer:{title:"Transferir pérdidas cubiertas",text:"Contratar un seguro cibernético adecuado para ciertas pérdidas de respuesta y recuperación, verificando exclusiones, límites y deducibles. El seguro no evita la interrupción."}},
+actions:[{type:"Reducir probabilidad",title:"Fortalecer acceso y protección de sistemas",text:"Implementar autenticación multifactor, privilegios mínimos, actualización de sistemas, copias de seguridad aisladas y capacitación contra phishing."},{type:"Reducir impacto",title:"Probar recuperación y facturación de contingencia",text:"Mantener respaldos recuperables y un procedimiento manual temporal para registrar ventas, cobros e inventarios mientras se restaura el sistema."}]},
+{id:"E5",title:"Cuenta vencida en reestructuración judicial",short:"Cuenta en reestructuración",prob:"Media",impact:"Alto",level:"high",desc:"La gerencia y auditoría discrepan sobre la probabilidad de cobro de una cuenta vencida por Q4 millones de un distribuidor mayorista en reestructuración judicial. Existe incertidumbre sobre la recuperación y la estimación contable.",treatments:{
+accept:{title:"Aceptar la exposición residual",text:"Mantener el saldo sujeto a una estimación de pérdida sustentada y revisada periódicamente, sin asumir que la totalidad será recuperada."},
+share:{title:"Compartir el esfuerzo de recuperación",text:"Negociar pagos parciales, garantías adicionales o una reestructuración documentada con el cliente y los acreedores involucrados."},
+transfer:{title:"Transferir la gestión o parte del crédito",text:"Evaluar la cesión del crédito o contratar especialistas legales y de recuperación; distinguir entre transferir la gestión y transferir realmente el riesgo económico."}},
+actions:[{type:"Reducir probabilidad",title:"Validar capacidad de pago y plan judicial",text:"Obtener información financiera actualizada, revisar el expediente judicial y confirmar con evidencia las fechas y condiciones del plan de recuperación."},{type:"Reducir impacto",title:"Documentar una estimación de pérdida sustentada",text:"Preparar escenarios de recuperación, revisar garantías y reconocer la pérdida estimada conforme al marco contable aplicable."}]},
+{id:"E6",title:"Ajuste fiscal precautorio por Q3.5 millones",short:"Ajuste fiscal",prob:"Media",impact:"Medio",level:"med",desc:"Se notifica un ajuste fiscal cobrable de forma precautoria por Q3.5 millones debido a discrepancias en la deducción de costos de importación de períodos anteriores. Puede afectar la caja y generar costos de defensa.",treatments:{
+accept:{title:"Aceptar el costo si procede",text:"Si la revisión confirma que el ajuste es válido, aceptar el pago y corregir el tratamiento fiscal para evitar mayores recargos."},
+share:{title:"Distribuir el desembolso en el tiempo",text:"Solicitar, si la normativa y la autoridad lo permiten, un convenio de pago que distribuya el efecto de caja sin asumir que desaparece la obligación."},
+transfer:{title:"Transferir ciertos costos de defensa",text:"Contratar asesoría tributaria especializada y evaluar garantías o instrumentos legalmente disponibles. La responsabilidad fiscal de la empresa puede permanecer."}},
+actions:[{type:"Reducir probabilidad",title:"Revisar documentación y criterios de deducción",text:"Conciliar declaraciones, pólizas de importación, facturas y soporte de costos; corregir debilidades de documentación para períodos futuros."},{type:"Reducir impacto",title:"Preparar un plan de caja y defensa fiscal",text:"Cuantificar escenarios, fechas de pago y costos de asesoría; presentar argumentos y evidencia dentro de los plazos legales aplicables."}]},
+{id:"E7",title:"Proveedores exigen pago contra entrega",short:"Cambio de condiciones de proveedores",prob:"Alta",impact:"Alto",level:"high",desc:"Los tres principales proveedores internacionales exigen cambiar de 60 días de crédito a pago contra entrega (COD). La empresa pierde plazo comercial y debe financiar antes las compras.",treatments:{
+accept:{title:"Aceptar el cambio en proveedores críticos",text:"Aceptar COD de forma selectiva cuando no existan alternativas razonables y la continuidad del suministro justifique el costo financiero."},
+share:{title:"Compartir la presión financiera",text:"Negociar transición escalonada, pagos parciales, garantías cruzadas o límites de compra que permitan al proveedor reducir su exposición y a la empresa administrar caja."},
+transfer:{title:"Transferir el financiamiento de la compra",text:"Evaluar cartas de crédito, financiamiento de comercio exterior u otros instrumentos bancarios para cubrir el pago al proveedor, sujeto a aprobación y costo."}},
+actions:[{type:"Reducir probabilidad",title:"Renegociar condiciones con cada proveedor",text:"Presentar historial de pagos, garantías y pronósticos de compra; proponer una transición gradual en lugar de un cambio inmediato a COD."},{type:"Reducir impacto",title:"Priorizar compras y asegurar proveedores alternos",text:"Clasificar insumos críticos, optimizar niveles mínimos de inventario y habilitar fuentes alternativas para evitar que el nuevo plazo detenga la operación."}]},
+{id:"E8",title:"Inventario de baja rotación por Q6 millones",short:"Inventario de baja rotación",prob:"Media",impact:"Medio",level:"med",desc:"Se acumula inventario de baja rotación por Q6 millones después de un cambio repentino en las preferencias de los consumidores hacia productos ecológicos. Hay riesgo de obsolescencia, descuentos y capital inmovilizado.",treatments:{
+accept:{title:"Aceptar una pérdida controlada",text:"Mantener temporalmente productos con posibilidad de venta futura, estableciendo límites de tiempo y revisiones de valor recuperable."},
+share:{title:"Compartir el costo de salida",text:"Negociar promociones conjuntas, paquetes comerciales, devoluciones o acuerdos de recompra con proveedores cuando sean viables."},
+transfer:{title:"Transferir inventario a otros canales",text:"Vender lotes a distribuidores secundarios o liquidadores, aceptando el descuento económico necesario y comparándolo con el costo de mantener el stock."}},
+actions:[{type:"Reducir probabilidad",title:"Ajustar compras a la demanda actual",text:"Actualizar pronósticos de ventas, limitar nuevas órdenes de las líneas lentas y usar indicadores de rotación y antigüedad por producto."},{type:"Reducir impacto",title:"Activar un plan de salida de inventario",text:"Diseñar promociones, paquetes, canales alternativos y liquidaciones selectivas; comparar los ingresos esperados con el costo de mantener o deteriorar el inventario."}]},
+{id:"E9",title:"Cancelación de línea de crédito por covenant",short:"Cancelación de línea de crédito",prob:"Alta",impact:"Alto",level:"high",desc:"El banco acreedor principal cancela unilateralmente la línea revolvente para capital de trabajo después del incumplimiento de un covenant financiero. La empresa puede enfrentar una brecha inmediata de liquidez.",treatments:{
+accept:{title:"Aceptar la reducción de financiamiento",text:"Ajustar operaciones y capital de trabajo al financiamiento disponible solo si existe un plan viable para cubrir obligaciones y sostener la operación."},
+share:{title:"Compartir el ajuste con el acreedor",text:"Negociar una dispensa (waiver), período de cura, nuevo covenant o reestructuración con condiciones realistas y compromisos verificables."},
+transfer:{title:"Sustituir la fuente de financiamiento",text:"Buscar una línea alternativa, factoring o financiamiento respaldado por activos. La nueva fuente debe confirmarse; no debe asumirse como disponible antes de su aprobación."}},
+actions:[{type:"Reducir probabilidad",title:"Monitorear covenants con alertas tempranas",text:"Calcular periódicamente los indicadores contractuales, proyectar escenarios y alertar a la gerencia antes de acercarse al límite."},{type:"Reducir impacto",title:"Activar un plan de liquidez alternativo",text:"Priorizar pagos, liberar capital de trabajo y negociar fuentes de financiamiento sustitutas para reducir la dependencia del banco principal."}]},
+{id:"E10",title:"Descuentos por pronto pago para cubrir planilla",short:"Descuentos por pronto pago",prob:"Alta",impact:"Medio",level:"high",desc:"Clientes clave solicitan descuentos masivos por pronto pago a cambio de adelantar liquidez para cubrir la planilla de fin de año. La entrada temprana de efectivo puede reducir el margen y crear precedentes comerciales.",treatments:{
+accept:{title:"Aceptar descuentos limitados",text:"Conceder descuentos selectivos solo cuando el costo del descuento sea menor que el beneficio financiero de recibir efectivo antes y no erosione el margen mínimo."},
+share:{title:"Compartir el beneficio de liquidez",text:"Negociar descuentos escalonados por volumen, fechas y pronto pago, limitados a clientes y facturas elegibles con beneficio mutuo."},
+transfer:{title:"Obtener liquidez de un tercero",text:"Evaluar confirming inverso, descuento de facturas u otra solución financiera con un banco, comparando comisión y tasa con el costo del descuento comercial."}},
+actions:[{type:"Reducir probabilidad",title:"Establecer una política de descuentos",text:"Definir topes, autorizaciones, clientes elegibles y margen mínimo; evitar negociaciones individuales fuera de política durante el cierre anual."},{type:"Reducir impacto",title:"Comparar el costo de descuentos con otras fuentes",text:"Preparar una proyección de caja de fin de año y comparar el costo efectivo de los descuentos con crédito bancario u otras alternativas disponibles."}]}
+];
+
+const probOrder=["Baja","Media","Alta"];
+const impactOrder=["Bajo","Medio","Alto"];
+const levelByScore={1:"low",2:"low",3:"med",4:"low",5:"med",6:"high",7:"med",8:"high",9:"high"};
+const labelByLevel={high:"Prioridad alta",med:"Prioridad media",low:"Prioridad baja"};
+let selectedId="E1", selectedTreatment="accept";
+
+function score(r){return (probOrder.indexOf(r.prob)+1)*(impactOrder.indexOf(r.impact)+1)}
+function severity(r){return levelByScore[score(r)]}
+function renderMatrix(){
+ const matrix=document.getElementById("matrix");
+ matrix.innerHTML="";
+ matrix.appendChild(Object.assign(document.createElement("div"),{className:"axis",textContent:"PROB. ↓ / IMPACTO →"}));
+ impactOrder.forEach(v=>{let d=document.createElement("div");d.className="axis";d.textContent=v;matrix.appendChild(d)});
+ [...probOrder].reverse().forEach(p=>{
+   let side=document.createElement("div");side.className="axis side";side.textContent=p;matrix.appendChild(side);
+   impactOrder.forEach(i=>{
+    let cell=document.createElement("button");cell.type="button";
+    let matches=risks.filter(r=>r.prob===p&&r.impact===i);
+    let level=levelByScore[(probOrder.indexOf(p)+1)*(impactOrder.indexOf(i)+1)];
+    cell.className="cell "+level;cell.dataset.prob=p;cell.dataset.impact=i;
+    cell.setAttribute("aria-label",`Probabilidad ${p}, impacto ${i}. Eventos: ${matches.map(r=>r.id).join(", ")||"ninguno"}`);
+    let label=document.createElement("span");label.className="level";label.textContent=labelByLevel[level];cell.appendChild(label);
+    let ids=document.createElement("span");ids.className="ids";
+    if(matches.length){matches.forEach(r=>{let chip=document.createElement("span");chip.className="event-chip"+(r.id===selectedId?" active":"");chip.textContent=r.id;chip.title=r.short;chip.addEventListener("click",e=>{e.stopPropagation();selectRisk(r.id)});ids.appendChild(chip)})}
+    else {let empty=document.createElement("span");empty.className="empty";empty.textContent="Sin eventos";ids.appendChild(empty)}
+    cell.appendChild(ids);cell.addEventListener("click",()=>{if(matches.length===1)selectRisk(matches[0].id);else if(matches.length>1)selectRisk(matches[0].id)});
+    matrix.appendChild(cell);
+   });
+ });
+}
+function renderSelect(){
+ const select=document.getElementById("riskSelect");
+ select.innerHTML="";
+ risks.forEach(r=>{let o=document.createElement("option");o.value=r.id;o.textContent=`${r.id} · ${r.short}`;select.appendChild(o)});
+ select.value=selectedId;
+}
+function selectRisk(id){
+ selectedId=id;selectedTreatment="accept";
+ const r=risks.find(x=>x.id===id);
+ document.getElementById("detailId").textContent="EVENTO "+r.id;
+ document.getElementById("detailTitle").textContent=r.title;
+ document.getElementById("description").textContent=r.desc;
+ const b=document.getElementById("badges");b.innerHTML="";
+ [[`Probabilidad: ${r.prob}`,""],[`Impacto: ${r.impact}`,""],[labelByLevel[severity(r)],severity(r)]].forEach(([t,c])=>{let x=document.createElement("span");x.className="badge "+c;x.textContent=t;b.appendChild(x)});
+ document.getElementById("actions").innerHTML="";
+ r.actions.forEach((a,i)=>{let d=document.createElement("div");d.className="action";d.innerHTML=`<div class="action-num">${i+1}</div><div><span class="action-type">${a.type}</span><strong>${a.title}</strong><p>${a.text}</p></div>`;document.getElementById("actions").appendChild(d)});
+ document.getElementById("riskSelect").value=id;
+ document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.treatment===selectedTreatment)));
+ renderTreatment();renderMatrix();
+}
+function renderTreatment(){
+ const r=risks.find(x=>x.id===selectedId), t=r.treatments[selectedTreatment];
+ const names={accept:"Aceptar el riesgo",share:"Compartir el riesgo",transfer:"Transferir el riesgo"};
+ document.getElementById("treatmentContent").innerHTML=`<div class="t-label">${names[selectedTreatment]}</div><h3>${t.title}</h3><p>${t.text}</p>`;
+}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{selectedTreatment=t.dataset.treatment;document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",String(x===t)));renderTreatment()}));
+document.getElementById("riskSelect").addEventListener("change",e=>selectRisk(e.target.value));
+renderMatrix();renderSelect();selectRisk("E1");
+</script>
+</body>
+</html>
